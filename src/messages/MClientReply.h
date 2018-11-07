@@ -128,6 +128,8 @@ struct InodeStat {
 
   quota_info_t quota;
 
+  mds_rank_t dir_pin;
+
  public:
   InodeStat() {}
   InodeStat(bufferlist::iterator& p, uint64_t features) {
@@ -136,6 +138,7 @@ struct InodeStat {
 
   void decode(bufferlist::iterator &p, uint64_t features) {
     using ceph::decode;
+<<<<<<< HEAD
     decode(vino.ino, p);
     decode(vino.snapid, p);
     decode(rdev, p);
@@ -171,6 +174,41 @@ struct InodeStat {
     decode(symlink, p);
     
     if (features & CEPH_FEATURE_DIRLAYOUTHASH)
+=======
+    if (features == (uint64_t)-1) {
+      DECODE_START(2, p);
+      decode(vino.ino, p);
+      decode(vino.snapid, p);
+      decode(rdev, p);
+      decode(version, p);
+      decode(xattr_version, p);
+      decode(cap, p);
+      {
+        ceph_file_layout legacy_layout;
+        decode(legacy_layout, p);
+        layout.from_legacy(legacy_layout);
+      }
+      decode(ctime, p);
+      decode(mtime, p);
+      decode(atime, p);
+      decode(time_warp_seq, p);
+      decode(size, p);
+      decode(max_size, p);
+      decode(truncate_size, p);
+      decode(truncate_seq, p);
+      decode(mode, p);
+      decode(uid, p);
+      decode(gid, p);
+      decode(nlink, p);
+      decode(dirstat.nfiles, p);
+      decode(dirstat.nsubdirs, p);
+      decode(rstat.rbytes, p);
+      decode(rstat.rfiles, p);
+      decode(rstat.rsubdirs, p);
+      decode(rstat.rctime, p);
+      decode(dirfragtree, p);
+      decode(symlink, p);
+>>>>>>> 8469a81... client: support getfattr ceph.dir.pin extended attribute
       decode(dir_layout, p);
     else
       memset(&dir_layout, 0, sizeof(dir_layout));
@@ -194,9 +232,80 @@ struct InodeStat {
     if ((features & CEPH_FEATURE_FS_BTIME)) {
       decode(btime, p);
       decode(change_attr, p);
+<<<<<<< HEAD
     } else {
       btime = utime_t();
       change_attr = 0;
+=======
+      if (struct_v > 1) {
+        decode(dir_pin, p);
+      } else {
+        dir_pin = -ENODATA;
+      }
+      DECODE_FINISH(p);
+    }
+    else {
+      decode(vino.ino, p);
+      decode(vino.snapid, p);
+      decode(rdev, p);
+      decode(version, p);
+      decode(xattr_version, p);
+      decode(cap, p);
+      {
+        ceph_file_layout legacy_layout;
+        decode(legacy_layout, p);
+        layout.from_legacy(legacy_layout);
+      }
+      decode(ctime, p);
+      decode(mtime, p);
+      decode(atime, p);
+      decode(time_warp_seq, p);
+      decode(size, p);
+      decode(max_size, p);
+      decode(truncate_size, p);
+      decode(truncate_seq, p);
+      decode(mode, p);
+      decode(uid, p);
+      decode(gid, p);
+      decode(nlink, p);
+      decode(dirstat.nfiles, p);
+      decode(dirstat.nsubdirs, p);
+      decode(rstat.rbytes, p);
+      decode(rstat.rfiles, p);
+      decode(rstat.rsubdirs, p);
+      decode(rstat.rctime, p);
+      decode(dirfragtree, p);
+      decode(symlink, p);
+      if (features & CEPH_FEATURE_DIRLAYOUTHASH)
+        decode(dir_layout, p);
+      else
+        memset(&dir_layout, 0, sizeof(dir_layout));
+
+      decode(xattrbl, p);
+
+      if (features & CEPH_FEATURE_MDS_INLINE_DATA) {
+        decode(inline_version, p);
+        decode(inline_data, p);
+      } else {
+        inline_version = CEPH_INLINE_NONE;
+      }
+
+      if (features & CEPH_FEATURE_MDS_QUOTA)
+        decode(quota, p);
+      else
+        quota = quota_info_t{};
+
+      if ((features & CEPH_FEATURE_FS_FILE_LAYOUT_V2))
+        decode(layout.pool_ns, p);
+
+      if ((features & CEPH_FEATURE_FS_BTIME)) {
+        decode(btime, p);
+        decode(change_attr, p);
+      } else {
+        btime = utime_t();
+        change_attr = 0;
+      }
+>>>>>>> 8469a81... client: support getfattr ceph.dir.pin extended attribute
     }
   }
   
