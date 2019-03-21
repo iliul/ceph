@@ -23,6 +23,7 @@
 #include "include/utime.h"
 
 #include "ceph_aio.h"
+#include "ceph_io_uring.h"
 #include "BlockDevice.h"
 
 #ifndef RW_IO_MAX
