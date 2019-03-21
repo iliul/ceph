@@ -54,8 +54,20 @@ KernelDevice::KernelDevice(CephContext* cct, aio_callback_t cb, void *cbpriv, ai
   fd_directs.resize(WRITE_LIFE_MAX, -1);
   fd_buffereds.resize(WRITE_LIFE_MAX, -1);
 
+  bool use_ioring = g_ceph_context->_conf.get_val<bool>("bluestore_ioring");
   unsigned int iodepth = cct->_conf->bdev_aio_max_queue_depth;
-  io_queue = std::unique_ptr<io_queue_t>(new aio_queue_t(iodepth));
+
+  if (use_ioring && ioring_queue_t::supported()) {
+    io_queue = std::unique_ptr<io_queue_t>(new ioring_queue_t(iodepth));
+  } else {
+    static bool once;
+    if (use_ioring && !once) {
+      derr << "WARNING: io_uring API is not supported! Fallback to libaio!"
+           << dendl;
+      once = true;
+    }
+    io_queue = std::unique_ptr<io_queue_t>(new aio_queue_t(iodepth));
+  }
 }
 
 int KernelDevice::_lock()

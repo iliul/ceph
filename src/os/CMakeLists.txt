@@ -38,7 +38,8 @@ endif(WITH_BLUESTORE)
 if(HAVE_LIBAIO OR HAVE_POSIXAIO)
   list(APPEND libos_srcs
     bluestore/KernelDevice.cc
-    bluestore/aio.cc)
+    bluestore/aio.cc
+    bluestore/io_uring.cc)
 endif()
 
 if(WITH_FUSE)
