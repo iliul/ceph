@@ -119,7 +119,7 @@ namespace rgw {
     LookupFHResult fhr{nullptr, 0};
 
     /* XXX the need for two round-trip operations to identify file or
-     * directory leaf objects is unecessary--the current proposed
+     * directory leaf objects is unnecessary--the current proposed
      * mechanism to avoid this is to store leaf object names with an
      * object locator w/o trailing slash */
 
